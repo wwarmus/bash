@@ -1,0 +1,9 @@
+[[ ${_AF_F_LOG:-} -eq 1 ]] && return || readonly _AF_F_LOG=1
+
+LOGFILE="/tmp/AF_$(date +%Y%m%d).log"
+
+function f_v_log(){
+  _msg=$1
+  echo "[$(date +%F" "%T)] : $_msg " >> $LOGFILE
+}
+

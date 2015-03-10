@@ -2,7 +2,7 @@
 
 _OSTYPE="unknown"
 
-function f_r_osType(){
+function f_s_osType(){
   type rpm &> /dev/null && _OSTYPE="rpm"
   type dpkg &> /dev/null && _OSTYPE="deb"
   

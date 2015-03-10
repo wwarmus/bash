@@ -2,10 +2,10 @@
 
 source lib/f_osType
 
-function f_r_pkgInstalled(){
+function f_n_pkgInstalled(){
   _pkg=$1
 
-  _osType=$(f_r_osType)
+  _osType=$(f_s_osType)
   
   case _osType in 
     "deb") _ret=$(dpkg -l ${_pkg} 2> /dev/null | grep -q ^ii ; echo $?)
@@ -16,6 +16,6 @@ function f_r_pkgInstalled(){
     
   esac
 
-  echo ${_ret}
+  return ${_ret}
 }
 
