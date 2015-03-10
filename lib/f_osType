@@ -1,0 +1,10 @@
+[[ ${_AF_F_OSTYPE:-} -eq 1 ]] && return || readonly _AF_F_OSTYPE=1
+
+_OSTYPE="unknown"
+
+function f_r_osType(){
+  type rpm &> /dev/null && _OSTYPE="rpm"
+  type dpkg &> /dev/null && _OSTYPE="deb"
+  
+  echo ${_OSTYPE}
+}

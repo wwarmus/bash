@@ -1,0 +1,21 @@
+[[ ${_AF_F_PKGINSTALLED:-} -eq 1 ]] && return || readonly _AF_F_PKGINSTALLED=1
+
+source lib/f_osType
+
+function f_r_pkgInstalled(){
+  _pkg=$1
+
+  _osType=$(f_r_osType)
+  
+  case _osType in 
+    "deb") _ret=$(dpkg -l ${_pkg} 2> /dev/null | grep -q ^ii ; echo $?)
+           ;;
+    "rpm") _ret=$(rpm -q ${_pkg} &> /dev/null ; echo $?)
+           ;;
+    "*")   _ret=2
+    
+  esac
+
+  echo ${_ret}
+}
+

@@ -1,0 +1,11 @@
+[[ ${_AF_F_CMDAVAILABLE:-} -eq 1 ]] && return || readonly _AF_F_CMDAVAILABLE=1
+
+function f_r_cmdAvailable(){
+  _cmd=$1
+
+  _ret=$(type -a ${_cmd} &> /dev/null ; echo $?)
+  return ${_ret}
+}
+  
+
+

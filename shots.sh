@@ -1,6 +1,13 @@
-#!/bin/bash
+#!/bin/bash -x
+
+source lib/f_cmdAvailable
 
 set -o nounset
+
+declare -a _REQ=(scrot git)
+for _cmd in ${_REQ[@]};
+  do f_r_cmdAvailable ${_cmd} || exit 1
+done
 
 #point this to the place where you have the git repo
 #_HOME=
