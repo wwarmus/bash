@@ -1,0 +1,15 @@
+[[ ${_AF_F_LIBLOAD:-} -eq 1 ]] && return || readonly _AF_F_LIBLOAD=1
+
+_LIB_BASEDIR=lib
+
+function f_libLoad() {
+  _lib=$1
+  _CWD=$(dirname $0)
+  if [[ -e ${_CWD}/../${_LIB_BASEDIR}/${_lib} ]]; then
+    source ${_CWD}/../${_LIB_BASEDIR}/${_lib}
+  else
+    echo "ERR: Library ${_lib} not found in ${_CWD}../${_LIB_BASEDIR}/"
+    exit 1
+  fi
+}
+

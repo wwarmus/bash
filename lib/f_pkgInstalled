@@ -1,6 +1,11 @@
 [[ ${_AF_F_PKGINSTALLED:-} -eq 1 ]] && return || readonly _AF_F_PKGINSTALLED=1
 
-source lib/f_osType
+if [[ -n ${_AF_F_LIBLOAD:-} ]]; then
+  f_libLoad f_osType
+else
+  echo "ERR: Library f_libLoad not loaded in you binary"
+  exit 1
+fi
 
 function f_n_pkgInstalled(){
   _pkg=$1
