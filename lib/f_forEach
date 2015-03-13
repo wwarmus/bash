@@ -1,5 +1,5 @@
 [[ ${_AF_F_FOREACH:-} -eq 1 ]] && return || readonly _AF_F_FOREACH=1
-set -x
+
 # usage:
 #  1) example with variable 
 #  declare -a ar=(a b c d e)
@@ -24,7 +24,7 @@ function f_v_forEach(){
   if [[ _testIterator -eq 0 ]]; then
     for _iterator in "${array_[@]}"; do
       # execute function on each _iterator 
-      # that's why keyword _iterator needs to 
+      # that's why keyword _iterator needs to be
       # defined in the function ($2 parameter)
       eval ${func_};
     done
