@@ -1,0 +1,25 @@
+[[ ${_AF_F_LOCK:-} -eq 1 ]] && return || readonly _AF_F_LOCK=1
+
+
+readonly _LOCK_FD=811 #cause $(echo f_n_lock | md5sum | sed 's/[a-z]//g' | cut -b 1-3) -eq 811
+readonly _LOCK_FILE=/var/lock/${_LOCK_FD}.lock
+
+function f_n_lock(){
+  # generate pseudorandom number of the descriptor
+  local _lock_fd=${1:-$_LOCK_FD}
+
+  # set the lock filename
+  local _lock_file=${2:-$_LOCK_FILE}
+
+  # create lock and return status code
+  eval "exec ${_lock_fd}>${_lock_file}"
+  flock -n ${_lock_fd} && return 0 || return 1
+}
+
+function f_v_unlock(){
+  # generate pseudorandom number of the descriptor
+  local _lock_fd=${1:-$_LOCK_FD}
+
+  # release the lock
+  flock -u ${_lock_fd} 
+}
