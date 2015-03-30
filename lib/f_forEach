@@ -6,28 +6,85 @@
 #  f_v_forEach '${ar[@]}' 'echo $_iterator' 
 #  2) example with array
 #  f_v_forEach '1 2' 'echo $_iterator $_iterator'
-#
+#  3) example of parallel mode (enabled by adding 3rd numeric, 
+#  greater than 1 parameter)
+#  declare -a ar=(a b c d e f g h i j k l m)
+#  f_v_forEach '${ar[@]}' 'sleep $(($RANDOM%15)) ; echo $_iterator' 3
 
 function f_v_forEach(){
-  if [[ $# -ne 2 || -z "$1" || -z "$2" ]]; then
-    echo "Invalid number of arguments, expected 2, got $#"
+  FORKED=false
+  argc_=$#
+  if [[ ${argc_} -ne 2 && ${argc_} -ne 3 ]]; then
+    echo "Invalid number of arguments, expected 2 or 3, got $#"
     exit 1;
   fi
+
+  case ${argc_} in
+    2) if [[ -z "${1}" || -z "${2}" ]]; then
+         echo "Invalid arguments, expected strings got 1: $1 2: $2"; 
+         exit 1;
+       fi
+       # assign $1 parameter into local array 
+       array_=($(eval echo "$1"));
+       arrayCount_=${#array_[@]};
+       func_="$2";
+       ;;
+    3) if [[ -z "${1}" || -z "${2}" || "${3}" -lt 2 ]]; then
+         echo "Invalid arguments, expected strings and number of subprocesses got 1: $1 2: $2 3: $3"; 
+         exit 1;
+       fi
+       # assign $1 parameter into local array 
+       array_=($(eval echo "$1"));
+       arrayCount_=${#array_[@]};
+       func_="$2";
+       FORKED=true
+       # assign number of forks (min($3,${arrayCount_}))
+       if [[ $3 -gt ${arrayCount_} ]]; then
+         forks_=${arrayCount_}
+       else
+         forks_=$3
+       fi
+       ;;
+     *) echo "Unknown error"
+        exit 1
+       ;;
+  esac
   
-  # assign $1 parameter into local array 
-  array_=($(echo "$1"));
-  arrayCount_=${#array_[@]};
-  func_="$2";
   
   # check if function ($2 parameter) contains keyword '_iterator'
   _testIterator=$(echo $func_ | grep -q _iterator ; echo $?);
-  if [[ _testIterator -eq 0 ]]; then
-    for _iterator in "${array_[@]}"; do
-      # execute function on each _iterator 
-      # that's why keyword _iterator needs to be
-      # defined in the function ($2 parameter)
-      eval ${func_};
-    done
+  if [[ ${_testIterator} -eq 0 ]]; then
+    if [[ ${FORKED:-} == true && ${forks_} -ge 2 ]]; then
+      # parallel mode 
+      _whileCounter=0;
+      unset _getpids
+      _getpids="(_)"
+      _pidsArray=();
+      while [[ $_whileCounter -lt $arrayCount_ ]]; do
+         # wait until any process finishes and an empty slot is available
+         while [[ $(ps u | awk '{print $2}' | egrep -c -e "$_getpids" ) -ge $forks_ ]]; do
+            sleep 0.2;
+         done
+         # execute function on each _iterator 
+         # that's why keyword _iterator needs to be
+         # defined in the function ($2 parameter)
+         _iterator=${array_[$_whileCounter]};
+         eval 'eval "${func_}"' &
+         # add new PID to the PIDS array
+         _getpids=$(echo $_getpids | sed "s/_/\\\<${!}\\\>|_/g")
+         _pidsArray[$_whileCounter]="${!}";
+         ((++_whileCounter));
+       done
+       wait ${_pidsArray[@]}
+    else
+      # interative mode 
+      for _iterator in "${array_[@]}"; do
+        # execute function on each _iterator 
+        # that's why keyword _iterator needs to be
+        # defined in the function ($2 parameter)
+        eval ${func_};
+      done
+    fi
   else
     echo "[Error] No _iterator defined in function";
   fi
