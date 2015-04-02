@@ -1,0 +1,13 @@
+[[ ${_AF_F_PUBIP:-} -eq 1 ]] && return || readonly _AF_F_PUBIP=1
+
+declare -a PROVIDERS=('checkip.dyndns.org' 'checkip.org')
+PROVIDER=${PROVIDERS[1]}
+
+function f_s_pubIP(){
+  case $PROVIDER in
+    ${PROVIDERS[0]}) curl -s http://checkip.dyndns.org | sed 's/[a-zA-Z/<> :]//g'
+      ;;
+    ${PROVIDERS[1]}) curl -s http://checkip.org/ | grep 'Your IP Address' | sed 's#</.*##g;s#.*>##g'
+      ;;
+  esac
+}
