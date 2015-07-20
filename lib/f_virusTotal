@@ -1,0 +1,24 @@
+[[ ${_AF_F_VIRUSTOTAL:-} -eq 1 ]] && return || readonly _AF_F_VIRUSTOTAL=1
+
+
+readonly VS_APIKEY=CHANGEME_SETME
+readonly VS_APIURI="https://www.virustotal.com/vtapi/v2"
+
+function __f_s_vsCurl () {
+  _apiMethod="$1"
+  _theRest=$2
+  curl -X POST "${VS_APIURI}/${_apiMethod}" --form apikey=${VS_APIKEY} ${_theRest} 2>/dev/null
+}
+
+function f_s_vsFileScan () {
+  _file=$(realpath "$1")
+
+  if [[ -e "${_file}" ]] ; then
+    __f_s_vsCurl "file/scan" "--form file=@${_file}"
+  fi
+}
+
+function f_s_vsFileReport () {
+  _hash="$1"
+  __f_s_vsCurl "file/report" "--form resource=${_hash}"
+}

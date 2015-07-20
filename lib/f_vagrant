@@ -1,0 +1,20 @@
+[[ ${_AF_F_VAGRANT:-} -eq 1 ]] && return || readonly _AF_F_VAGRANT=1
+
+function f_vagrantRecreate(){
+  _vms=$@
+  vagrant destroy -f ${_vms}
+  vagrant up ${_vms}
+}
+
+function f_vagrantReboot(){
+  _vms=$@
+  vagrant halt ${_vms}
+  vagrant up ${_vms}
+}
+
+function f_vagrantRebootSSH(){
+  _vms=$@
+  f_vagrantReboot ${_vms}
+  vagrant ssh ${_vms}
+}
+
